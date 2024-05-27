@@ -17,7 +17,9 @@ fn main() {
     let robco_notice = r#"ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL"#;
 
     slow_print(&robco_notice.on_green().to_string(), 25);
-    let _audio_sink = play_sound("ok");
+    if !std::env::args().any(|arg| arg == "--no-sound") {
+        play_sound("ok").unwrap();
+    }
     let instructions = r#"Enter possible words (type 'done' to finish):"#;
     slow_print(&instructions.green().to_string(), 25);
     loop {
@@ -29,7 +31,9 @@ fn main() {
         }
         if !word.is_empty() {
             words.push(word);
-            play_sound("bad").unwrap();
+            if !std::env::args().any(|arg| arg == "--no-sound") {
+                play_sound("bad").unwrap();
+            }
         }
     }
 
@@ -62,7 +66,9 @@ fn main() {
         words = filter_words(&words, &guess, likeness);
         if words.len() == 1 {
             println!("The password is: {}", words[0]);
-            play_sound("ok").unwrap();
+            if !std::env::args().any(|arg| arg == "--no-sound") {
+                play_sound("ok").unwrap();
+            }
             break;
         } else if words.is_empty() {
             println!("No possible words left. Exiting.");
@@ -76,23 +82,16 @@ fn main() {
 fn play_sound(file_path: &str) -> Result<rodio::Sink, Box<dyn std::error::Error>> {
     let ok = include_bytes!("ui_hacking_passgood.wav");
     let fail = include_bytes!("ui_hacking_passbad.wav");
-
     let (_stream, stream_handle) = OutputStream::try_default()?;
     let sink = Sink::try_new(&stream_handle)?;
-
     let src_file: &[u8] = match file_path {
         "ok" => ok,
         _ => fail,
     };
-
     let source = Decoder::new_wav(Cursor::new(src_file))?;
-
     sink.append(source);
     sink.play();
-
-    // abrupt sound without it
     thread::sleep(Duration::from_millis(200));
-
     Ok(sink)
 }
 
