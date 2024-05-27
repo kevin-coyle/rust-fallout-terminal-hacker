@@ -19,3 +19,4 @@ cargo run
 ```
 
 Fallout is a registered trademark of Bethesda Softworks LLC.
+Credit to https://github.com/murlakatamenka/fallout_terminal_sound for the sound files
