@@ -1,8 +1,14 @@
 use std::io::{self, Write};
+use std::time::Duration;
+use std::thread;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use colored::*;
 use console::Term;
+use rodio::{OutputStream, Sink, Decoder};
+use std::io::Cursor;
+
+use colored::*;
+
 
 fn main() {
     let mut words = vec![];
@@ -10,9 +16,10 @@ fn main() {
     term.clear_screen().unwrap();
     let robco_notice = r#"ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL"#;
 
-    println!("{}", robco_notice.on_green());
+    slow_print(&robco_notice.on_green().to_string(), 25);
+    let _audio_sink = play_sound("ok");
     let instructions = r#"Enter possible words (type 'done' to finish):"#;
-    println!("{}", instructions.green());
+    slow_print(&instructions.green().to_string(), 25);
     loop {
         let mut word = String::new();
         io::stdin().read_line(&mut word).expect("Failed to read line");
@@ -22,6 +29,7 @@ fn main() {
         }
         if !word.is_empty() {
             words.push(word);
+            play_sound("bad").unwrap();
         }
     }
 
@@ -54,6 +62,7 @@ fn main() {
         words = filter_words(&words, &guess, likeness);
         if words.len() == 1 {
             println!("The password is: {}", words[0]);
+            play_sound("ok").unwrap();
             break;
         } else if words.is_empty() {
             println!("No possible words left. Exiting.");
@@ -62,6 +71,29 @@ fn main() {
             println!("Remaining possible words: {:?}", words);
         }
     }
+}
+
+fn play_sound(file_path: &str) -> Result<rodio::Sink, Box<dyn std::error::Error>> {
+    let ok = include_bytes!("ui_hacking_passgood.wav");
+    let fail = include_bytes!("ui_hacking_passbad.wav");
+
+    let (_stream, stream_handle) = OutputStream::try_default()?;
+    let sink = Sink::try_new(&stream_handle)?;
+
+    let src_file: &[u8] = match file_path {
+        "ok" => ok,
+        _ => fail,
+    };
+
+    let source = Decoder::new_wav(Cursor::new(src_file))?;
+
+    sink.append(source);
+    sink.play();
+
+    // abrupt sound without it
+    thread::sleep(Duration::from_millis(200));
+
+    Ok(sink)
 }
 
 fn filter_words(words: &[String], guess: &str, likeness: usize) -> Vec<String> {
@@ -78,4 +110,13 @@ fn calculate_likeness(word1: &str, word2: &str) -> usize {
         .zip(word2.chars())
         .filter(|(c1, c2)| c1 == c2)
         .count()
+}
+
+fn slow_print(s: &str, delay: u64) {
+    for c in s.chars() {
+        print!("{}", c);
+        io::stdout().flush().unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(delay));
+    }
+    println!();
 }
