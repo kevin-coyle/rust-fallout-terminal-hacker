@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8"
-crossterm = "0.20"
+colored = "1.9.3"
+console = "0.14.1"

@@ -14,8 +14,8 @@ To use the Fallout 3 Terminal Cracker, you need to have Rust installed on your s
 Once you have Rust installed, you can clone this repository and build the tool using the following commands:
 
 ```
-cargo install
 cargo build
+cargo run
 ```
 
 Fallout is a registered trademark of Bethesda Softworks LLC.

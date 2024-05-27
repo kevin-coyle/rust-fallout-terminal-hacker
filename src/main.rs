@@ -1,10 +1,18 @@
 use std::io::{self, Write};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use colored::*;
+use console::Term;
 
 fn main() {
     let mut words = vec![];
-    println!("Enter possible words (type 'done' to finish):");
+    let term = Term::stdout();
+    term.clear_screen().unwrap();
+    let robco_notice = r#"ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL"#;
+
+    println!("{}", robco_notice.on_green());
+    let instructions = r#"Enter possible words (type 'done' to finish):"#;
+    println!("{}", instructions.green());
     loop {
         let mut word = String::new();
         io::stdin().read_line(&mut word).expect("Failed to read line");
@@ -18,7 +26,8 @@ fn main() {
     }
 
     if words.is_empty() {
-        println!("No words entered. Exiting.");
+        let no_words = r#"No words entered. Exiting."#;
+        println!("{}", no_words.green());
         return;
     }
 
