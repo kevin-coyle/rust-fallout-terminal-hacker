@@ -19,4 +19,3 @@ cargo build
 ```
 
 Fallout is a registered trademark of Bethesda Softworks LLC.
-sf
