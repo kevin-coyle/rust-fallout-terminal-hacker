@@ -1,0 +1,39 @@
+name: Rust Build and Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build_and_release:
+    name: Build and Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.repository.releases_url }}
+          asset_path: ./target/release/terminal_solver
+          asset_name: terminal_solver-${{ matrix.os }}
+          asset_content_type: application/octet-stream
